@@ -1,8 +1,8 @@
+import 'package:drift_demo/database/app_database.dart';
+import 'package:drift_demo/database/database_queries.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../view_note/view_note_view.dart';
 import 'home_controller.dart';
-import 'model/note_model.dart';
 
 /// Main screen of the application that displays a list of notes with CRUD operations
 class HomeView extends GetView<HomeController> {
@@ -16,74 +16,34 @@ class HomeView extends GetView<HomeController> {
         title: const Text('Notes'),
         centerTitle: true,
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  controller.errorMessage.value,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: controller.loadNotes,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (controller.notes.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.note_add, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'No notes yet\nTap + to add a note',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.loadNotes,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: controller.notes.length,
-            itemBuilder: (context, index) {
-              final note = controller.notes[index];
-              return _buildNoteCard(note);
-            },
-          ),
-        );
-      }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => ViewNoteView()),
+        onPressed: () {
+          showAddNoteDialog(context);
+        },
         child: const Icon(Icons.add),
       ),
+      body: Obx(() {
+        return controller.notes.isEmpty
+            ? const Center(child: Text("Empty List"))
+            : ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: controller.notes.length,
+                itemBuilder: (context, index) {
+                  final note = controller.notes[index];
+                  return _buildNoteCard(note);
+                },
+              );
+      }),
     );
   }
 
   /// Builds a card widget for displaying a note in the list
-  Widget _buildNoteCard(Note note) {
+  Widget _buildNoteCard(NotesEntityData note) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Text(
-          note.title.isEmpty ? 'Untitled' : note.title,
+          note.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -93,38 +53,73 @@ class HomeView extends GetView<HomeController> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        onTap: () => Get.to(() => ViewNoteView(note: note)),
+        onTap: () {},
         trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => _showDeleteDialog(note),
-        ),
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              DatabaseQueries.deleteNote(note.id);
+            }),
       ),
     );
   }
+}
 
-  /// Shows a confirmation dialog before deleting a note
-  void _showDeleteDialog(Note note) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Delete Note'),
-        content: Text(
-          'Are you sure you want to delete "${note.title.isEmpty ? 'Untitled' : note.title}"?',
+/// Shows a dialog to add a new note
+void showAddNoteDialog(BuildContext context) {
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Add Note"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: "Title"),
+            ),
+            TextField(
+              controller: contentController,
+              decoration: const InputDecoration(labelText: "Content"),
+              maxLines: 3,
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
           ),
-          TextButton(
-            onPressed: () {
-              controller.deleteNote(note.id);
+          ElevatedButton(
+            onPressed: () async {
+              final title = titleController.text.trim();
+              final content = contentController.text.trim();
+
+              if (title.isEmpty || content.isEmpty) {
+                Get.snackbar("Error", "Title and content cannot be empty");
+                return;
+              }
+
+              final now = DateTime.now().toString();
+              final uuid = DateTime.now().toString(); // or use uuid package
+
+              await DatabaseQueries.addOrUpdateNote(
+                title: title,
+                content: content,
+                id: uuid,
+                createdAt: now,
+                updatedAt: now,
+              );
+
               Get.back();
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text("Save"),
           ),
         ],
-      ),
-    );
-  }
+      );
+    },
+  );
 }

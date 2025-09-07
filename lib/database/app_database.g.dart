@@ -3,47 +3,40 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $NotesTable extends Notes with TableInfo<$NotesTable, DbNote> {
+class $NotesEntityTable extends NotesEntity
+    with TableInfo<$NotesEntityTable, NotesEntityData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $NotesTable(this.attachedDatabase, [this._alias]);
+  $NotesEntityTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'title', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
-      'content', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
       'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
       'updated_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
       [id, title, content, createdAt, updatedAt];
@@ -51,30 +44,40 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, DbNote> {
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'notes';
+  static const String $name = 'notes_entity';
   @override
-  VerificationContext validateIntegrity(Insertable<DbNote> instance,
+  VerificationContext validateIntegrity(Insertable<NotesEntityData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
     }
     if (data.containsKey('content')) {
       context.handle(_contentMeta,
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
     }
     return context;
   }
@@ -82,106 +85,99 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, DbNote> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  DbNote map(Map<String, dynamic> data, {String? tablePrefix}) {
+  NotesEntityData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbNote(
+    return NotesEntityData(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title']),
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       content: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}content']),
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
       createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}updated_at'])!,
     );
   }
 
   @override
-  $NotesTable createAlias(String alias) {
-    return $NotesTable(attachedDatabase, alias);
+  $NotesEntityTable createAlias(String alias) {
+    return $NotesEntityTable(attachedDatabase, alias);
   }
 }
 
-class DbNote extends DataClass implements Insertable<DbNote> {
-  final int id;
-  final String? title;
-  final String? content;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  const DbNote(
+class NotesEntityData extends DataClass implements Insertable<NotesEntityData> {
+  final String id;
+  final String title;
+  final String content;
+  final String createdAt;
+  final String updatedAt;
+  const NotesEntityData(
       {required this.id,
-      this.title,
-      this.content,
+      required this.title,
+      required this.content,
       required this.createdAt,
       required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    if (!nullToAbsent || title != null) {
-      map['title'] = Variable<String>(title);
-    }
-    if (!nullToAbsent || content != null) {
-      map['content'] = Variable<String>(content);
-    }
-    map['created_at'] = Variable<DateTime>(createdAt);
-    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['content'] = Variable<String>(content);
+    map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
     return map;
   }
 
-  NotesCompanion toCompanion(bool nullToAbsent) {
-    return NotesCompanion(
+  NotesEntityCompanion toCompanion(bool nullToAbsent) {
+    return NotesEntityCompanion(
       id: Value(id),
-      title:
-          title == null && nullToAbsent ? const Value.absent() : Value(title),
-      content: content == null && nullToAbsent
-          ? const Value.absent()
-          : Value(content),
+      title: Value(title),
+      content: Value(content),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
   }
 
-  factory DbNote.fromJson(Map<String, dynamic> json,
+  factory NotesEntityData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return DbNote(
-      id: serializer.fromJson<int>(json['id']),
-      title: serializer.fromJson<String?>(json['title']),
-      content: serializer.fromJson<String?>(json['content']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    return NotesEntityData(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'title': serializer.toJson<String?>(title),
-      'content': serializer.toJson<String?>(content),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'content': serializer.toJson<String>(content),
+      'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
     };
   }
 
-  DbNote copyWith(
-          {int? id,
-          Value<String?> title = const Value.absent(),
-          Value<String?> content = const Value.absent(),
-          DateTime? createdAt,
-          DateTime? updatedAt}) =>
-      DbNote(
+  NotesEntityData copyWith(
+          {String? id,
+          String? title,
+          String? content,
+          String? createdAt,
+          String? updatedAt}) =>
+      NotesEntityData(
         id: id ?? this.id,
-        title: title.present ? title.value : this.title,
-        content: content.present ? content.value : this.content,
+        title: title ?? this.title,
+        content: content ?? this.content,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
-  DbNote copyWithCompanion(NotesCompanion data) {
-    return DbNote(
+  NotesEntityData copyWithCompanion(NotesEntityCompanion data) {
+    return NotesEntityData(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
@@ -192,7 +188,7 @@ class DbNote extends DataClass implements Insertable<DbNote> {
 
   @override
   String toString() {
-    return (StringBuffer('DbNote(')
+    return (StringBuffer('NotesEntityData(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
@@ -207,7 +203,7 @@ class DbNote extends DataClass implements Insertable<DbNote> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is DbNote &&
+      (other is NotesEntityData &&
           other.id == this.id &&
           other.title == this.title &&
           other.content == this.content &&
@@ -215,32 +211,40 @@ class DbNote extends DataClass implements Insertable<DbNote> {
           other.updatedAt == this.updatedAt);
 }
 
-class NotesCompanion extends UpdateCompanion<DbNote> {
-  final Value<int> id;
-  final Value<String?> title;
-  final Value<String?> content;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updatedAt;
-  const NotesCompanion({
+class NotesEntityCompanion extends UpdateCompanion<NotesEntityData> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> content;
+  final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<int> rowid;
+  const NotesEntityCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  NotesCompanion.insert({
-    this.id = const Value.absent(),
-    this.title = const Value.absent(),
-    this.content = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
-  });
-  static Insertable<DbNote> custom({
-    Expression<int>? id,
+  NotesEntityCompanion.insert({
+    required String id,
+    required String title,
+    required String content,
+    required String createdAt,
+    required String updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        title = Value(title),
+        content = Value(content),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<NotesEntityData> custom({
+    Expression<String>? id,
     Expression<String>? title,
     Expression<String>? content,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updatedAt,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -248,21 +252,24 @@ class NotesCompanion extends UpdateCompanion<DbNote> {
       if (content != null) 'content': content,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  NotesCompanion copyWith(
-      {Value<int>? id,
-      Value<String?>? title,
-      Value<String?>? content,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt}) {
-    return NotesCompanion(
+  NotesEntityCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? title,
+      Value<String>? content,
+      Value<String>? createdAt,
+      Value<String>? updatedAt,
+      Value<int>? rowid}) {
+    return NotesEntityCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -270,7 +277,7 @@ class NotesCompanion extends UpdateCompanion<DbNote> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<int>(id.value);
+      map['id'] = Variable<String>(id.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -279,22 +286,26 @@ class NotesCompanion extends UpdateCompanion<DbNote> {
       map['content'] = Variable<String>(content.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      map['created_at'] = Variable<String>(createdAt.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('NotesCompanion(')
+    return (StringBuffer('NotesEntityCompanion(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -303,38 +314,43 @@ class NotesCompanion extends UpdateCompanion<DbNote> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $NotesTable notes = $NotesTable(this);
+  late final $NotesEntityTable notesEntity = $NotesEntityTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [notes];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [notesEntity];
 }
 
-typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
-  Value<int> id,
-  Value<String?> title,
-  Value<String?> content,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
+typedef $$NotesEntityTableCreateCompanionBuilder = NotesEntityCompanion
+    Function({
+  required String id,
+  required String title,
+  required String content,
+  required String createdAt,
+  required String updatedAt,
+  Value<int> rowid,
 });
-typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
-  Value<int> id,
-  Value<String?> title,
-  Value<String?> content,
-  Value<DateTime> createdAt,
-  Value<DateTime> updatedAt,
+typedef $$NotesEntityTableUpdateCompanionBuilder = NotesEntityCompanion
+    Function({
+  Value<String> id,
+  Value<String> title,
+  Value<String> content,
+  Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<int> rowid,
 });
 
-class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
-  $$NotesTableFilterComposer({
+class $$NotesEntityTableFilterComposer
+    extends Composer<_$AppDatabase, $NotesEntityTable> {
+  $$NotesEntityTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id => $composableBuilder(
+  ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get title => $composableBuilder(
@@ -343,23 +359,23 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
   ColumnFilters<String> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+  ColumnFilters<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+  ColumnFilters<String> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
 }
 
-class $$NotesTableOrderingComposer
-    extends Composer<_$AppDatabase, $NotesTable> {
-  $$NotesTableOrderingComposer({
+class $$NotesEntityTableOrderingComposer
+    extends Composer<_$AppDatabase, $NotesEntityTable> {
+  $$NotesEntityTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id => $composableBuilder(
+  ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get title => $composableBuilder(
@@ -368,23 +384,23 @@ class $$NotesTableOrderingComposer
   ColumnOrderings<String> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+  ColumnOrderings<String> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 }
 
-class $$NotesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $NotesTable> {
-  $$NotesTableAnnotationComposer({
+class $$NotesEntityTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NotesEntityTable> {
+  $$NotesEntityTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
+  GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
@@ -393,62 +409,69 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
+  GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get updatedAt =>
+  GeneratedColumn<String> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 }
 
-class $$NotesTableTableManager extends RootTableManager<
+class $$NotesEntityTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $NotesTable,
-    DbNote,
-    $$NotesTableFilterComposer,
-    $$NotesTableOrderingComposer,
-    $$NotesTableAnnotationComposer,
-    $$NotesTableCreateCompanionBuilder,
-    $$NotesTableUpdateCompanionBuilder,
-    (DbNote, BaseReferences<_$AppDatabase, $NotesTable, DbNote>),
-    DbNote,
+    $NotesEntityTable,
+    NotesEntityData,
+    $$NotesEntityTableFilterComposer,
+    $$NotesEntityTableOrderingComposer,
+    $$NotesEntityTableAnnotationComposer,
+    $$NotesEntityTableCreateCompanionBuilder,
+    $$NotesEntityTableUpdateCompanionBuilder,
+    (
+      NotesEntityData,
+      BaseReferences<_$AppDatabase, $NotesEntityTable, NotesEntityData>
+    ),
+    NotesEntityData,
     PrefetchHooks Function()> {
-  $$NotesTableTableManager(_$AppDatabase db, $NotesTable table)
+  $$NotesEntityTableTableManager(_$AppDatabase db, $NotesEntityTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$NotesTableFilterComposer($db: db, $table: table),
+              $$NotesEntityTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$NotesTableOrderingComposer($db: db, $table: table),
+              $$NotesEntityTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$NotesTableAnnotationComposer($db: db, $table: table),
+              $$NotesEntityTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> title = const Value.absent(),
-            Value<String?> content = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            Value<String> id = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
-              NotesCompanion(
+              NotesEntityCompanion(
             id: id,
             title: title,
             content: content,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String?> title = const Value.absent(),
-            Value<String?> content = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
-            Value<DateTime> updatedAt = const Value.absent(),
+            required String id,
+            required String title,
+            required String content,
+            required String createdAt,
+            required String updatedAt,
+            Value<int> rowid = const Value.absent(),
           }) =>
-              NotesCompanion.insert(
+              NotesEntityCompanion.insert(
             id: id,
             title: title,
             content: content,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -457,22 +480,25 @@ class $$NotesTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$NotesTableProcessedTableManager = ProcessedTableManager<
+typedef $$NotesEntityTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $NotesTable,
-    DbNote,
-    $$NotesTableFilterComposer,
-    $$NotesTableOrderingComposer,
-    $$NotesTableAnnotationComposer,
-    $$NotesTableCreateCompanionBuilder,
-    $$NotesTableUpdateCompanionBuilder,
-    (DbNote, BaseReferences<_$AppDatabase, $NotesTable, DbNote>),
-    DbNote,
+    $NotesEntityTable,
+    NotesEntityData,
+    $$NotesEntityTableFilterComposer,
+    $$NotesEntityTableOrderingComposer,
+    $$NotesEntityTableAnnotationComposer,
+    $$NotesEntityTableCreateCompanionBuilder,
+    $$NotesEntityTableUpdateCompanionBuilder,
+    (
+      NotesEntityData,
+      BaseReferences<_$AppDatabase, $NotesEntityTable, NotesEntityData>
+    ),
+    NotesEntityData,
     PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$NotesTableTableManager get notes =>
-      $$NotesTableTableManager(_db, _db.notes);
+  $$NotesEntityTableTableManager get notesEntity =>
+      $$NotesEntityTableTableManager(_db, _db.notesEntity);
 }
