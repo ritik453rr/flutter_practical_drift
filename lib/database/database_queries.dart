@@ -6,36 +6,43 @@ import 'package:drift/drift.dart';
 class DatabaseQueries {
   /// Watches all notes in real-time as a stream.
   static Stream<List<NotesEntityData>> watchAllNotes() {
-    return Global.database.select(Global.database.notesEntity).watch();
+    return (Global.database.select(Global.database.notesEntity)
+          ..orderBy([
+            (t) => OrderingTerm(
+                  expression: t.updatedAt,
+                  mode: OrderingMode.desc,
+                ),
+          ]))
+        .watch();
   }
 
-   /// Adds or updates a note in the database if the ID already exists.
-  static Future<int> addOrUpdateNote({
-    required String title,
-    required String content,
-    required String id,
-    required String createdAt,
-    required String updatedAt,
-  }) {
-    return Global.database.into(Global.database.notesEntity).insertOnConflictUpdate(
-      NotesEntityCompanion(
-        id: Value(id),
-        title: Value(title),
-        content: Value(content),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-      ),
-    );
+  /// Adds or updates a note in the database if the ID already exists.
+  static Future<void> addOrUpdateNote({
+    required NotesEntityData note,
+  }) async {
+    await Global.database
+        .into(Global.database.notesEntity)
+        .insertOnConflictUpdate(
+          NotesEntityCompanion(
+            id: Value(note.id),
+            title: Value(note.title),
+            content: Value(note.content),
+            createdAt: Value(note.createdAt),
+            updatedAt: Value(note.updatedAt),
+          ),
+        )
+        .catchError((e) {
+      print('Error:$e');
+    });
   }
+
   /// Deletes a note from the database by its ID.
-  static Future<void> deleteNote(String id) {
-    return (Global.database.delete(Global.database.notesEntity)
+  static Future<void> deleteNote(String id) async {
+    await (Global.database.delete(Global.database.notesEntity)
           ..where((tbl) => tbl.id.equals(id)))
-        .go();
-  }
-
-  /// Updates the given note in the database.
-  static Future<void> updateNote(NotesEntityData note) async {
-    await Global.database.update(Global.database.notesEntity).replace(note);
+        .go()
+        .catchError((e) {
+      print('Error deleting note with id $id: $e');
+    });
   }
 }
