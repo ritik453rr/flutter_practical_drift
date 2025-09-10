@@ -22,7 +22,7 @@ class HomeView extends StatelessWidget {
       ),
       body: Obx(() {
         return controller.notes.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: Text("Empty Notes"))
             : ListView.builder(
                 padding: const EdgeInsets.all(8),
                 itemCount: controller.notes.length,

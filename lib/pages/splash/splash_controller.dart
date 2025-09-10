@@ -14,8 +14,7 @@ class SplashController extends GetxController {
     Get.find<HomeController>()
         .notes
         .bindStream(DatabaseQueries.watchAllNotes());
-
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(milliseconds: 2400), () {
       Get.offNamed(AppRoutes.home);
     });
   }
